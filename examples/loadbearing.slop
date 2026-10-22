@@ -1,0 +1,7 @@
+— loadbearing declares a constant. Assigning to it is a runtime error.
+loadbearing LIMIT = 100✨
+slop score = 10✨
+
+score = score + 1✨
+hallucinate(score)✨
+hallucinate(LIMIT)✨

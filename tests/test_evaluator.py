@@ -76,6 +76,38 @@ hallucinate(x)✨"""
     assert run(source) == "2\n"
 
 
+def test_loadbearing_is_an_immutable_constant():
+    source = """loadbearing LIMIT = 100✨
+slop score = 10✨
+score = score + 1✨
+hallucinate(score)✨
+hallucinate(LIMIT)✨"""
+    assert run(source) == "11\n100\n"
+
+
+def test_assignment_to_loadbearing_is_an_error():
+    assert fails("loadbearing LIMIT = 100✨\nLIMIT = 200✨") == (
+        "SlopLang runtime error at line 2: cannot assign to loadbearing 'LIMIT'"
+    )
+
+
+def test_loadbearing_is_block_scoped_and_can_be_shadowed():
+    source = """loadbearing LIMIT = 100✨
+{
+    loadbearing LIMIT = 5✨
+    hallucinate(LIMIT)✨
+}
+hallucinate(LIMIT)✨"""
+    assert run(source) == "5\n100\n"
+
+
+@pytest.mark.parametrize("redeclaration", ["loadbearing LIMIT = 200✨", "slop LIMIT = 200✨"])
+def test_loadbearing_cannot_be_redeclared_in_the_same_scope(redeclaration: str):
+    assert fails(f"loadbearing LIMIT = 100✨\n{redeclaration}") == (
+        "SlopLang runtime error at line 2: 'LIMIT' is already declared in this scope"
+    )
+
+
 def test_loop_body_is_a_fresh_scope_each_iteration():
     source = """slop i = 0✨
 ralph i < 3 {
