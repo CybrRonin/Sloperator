@@ -52,6 +52,21 @@ def test_equality_never_coerces(expression: str, expected: str):
     assert run(source) == f"{expected}\n"
 
 
+@pytest.mark.parametrize("expression", ["1 / 0", "0 / 0", "-1 / 0", "1 / (3 - 3)"])
+def test_division_by_zero_is_a_runtime_error(expression: str):
+    assert fails(f"hallucinate({expression})✨") == (
+        "SlopLang runtime error at line 1: division by zero"
+    )
+
+
+def test_division_by_zero_reports_the_division_line():
+    source = """clanker halve(n) {
+    ship n / 0✨
+}
+hallucinate(halve(2))✨"""
+    assert fails(source) == "SlopLang runtime error at line 2: division by zero"
+
+
 def test_short_circuit_skips_right_operand():
     assert run("hallucinate(❌ && 1 / 0 == 0)✨\nhallucinate(✅ || 1 / 0 == 0)✨") == "❌\n✅\n"
 
